@@ -26,3 +26,5 @@ jobs:
         previous_tag="${{ steps.get_prev_tag.outputs.prev_tag }}"
         current_tag="${{ github.ref }}"
         gh release create "${current_tag}" $(git log --pretty=format:'- [%h] %s (%an)' "${previous_tag}".."${current_tag}")
+    - env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}    
