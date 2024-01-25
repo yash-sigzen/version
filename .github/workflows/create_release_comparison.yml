@@ -1,0 +1,28 @@
+name: Create Release from Comparison
+
+on:
+  workflow_run:
+    workflows: ["Create Tag"]
+    types:
+      - completed
+
+jobs:
+  create-release-from-comparison:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Git
+      run: git config --global user.email "actions@github.com" && git config --global user.name "GitHub Actions"
+
+    - name: Get previous tag
+      id: get_prev_tag
+      run: echo "::set-output name=prev_tag::$(git describe --tags --abbrev=0 HEAD^)"
+
+    - name: Create release from comparison
+      run: |
+        previous_tag="${{ steps.get_prev_tag.outputs.prev_tag }}"
+        current_tag="${{ github.ref }}"
+        gh release create "${current_tag}" $(git log --pretty=format:'- [%h] %s (%an)' "${previous_tag}".."${current_tag}")
